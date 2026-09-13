@@ -1,0 +1,2984 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>
+        Bộ môn Trắc địa và Viễn thám - WebGIS
+    </title>
+
+
+    <!-- =====================================================
+         LEAFLET CSS
+    ====================================================== -->
+
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    >
+
+
+    <!-- =====================================================
+         CSS
+    ====================================================== -->
+
+    <style>
+
+        * {
+            box-sizing: border-box;
+        }
+
+
+        html,
+        body {
+
+            margin: 0;
+            padding: 0;
+
+            width: 100%;
+            height: 100%;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+        }
+
+
+        /* =====================================================
+           HEADER
+        ====================================================== */
+
+        #header {
+
+            height: 88px;
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #003b63,
+                    #006699
+                );
+
+            color: white;
+
+            display: grid;
+
+            grid-template-columns:
+                72px
+                minmax(0, 1fr)
+                72px;
+
+            align-items: center;
+
+            padding:
+                0 18px;
+
+            box-shadow:
+                0 2px 8px
+                rgba(0, 0, 0, 0.28);
+
+            position: relative;
+
+            z-index: 2000;
+
+        }
+
+
+        #header-spacer {
+
+            width: 72px;
+            height: 72px;
+
+        }
+
+
+        #header-title {
+
+            display: flex;
+
+            flex-direction: column;
+
+            justify-content: center;
+
+            align-items: center;
+
+            text-align: center;
+
+            line-height: 1.2;
+
+            min-width: 0;
+
+        }
+
+
+        #header-title .university {
+
+            font-size: 14px;
+
+            font-weight: 500;
+
+            text-transform: uppercase;
+
+            letter-spacing: 0.9px;
+
+            margin-bottom: 4px;
+
+            opacity: 0.95;
+
+        }
+
+
+        #header-title .main {
+
+            font-size: 25px;
+
+            font-weight: bold;
+
+            letter-spacing: 0.6px;
+
+        }
+
+
+        #header-title .sub {
+
+            font-size: 13px;
+
+            margin-top: 5px;
+
+            opacity: 0.92;
+
+            letter-spacing: 0.2px;
+
+        }
+
+
+        /* =====================================================
+           UTC LOGO
+        ====================================================== */
+
+        #header-logo-wrap {
+
+            width: 72px;
+
+            height: 72px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+        }
+
+
+        #header-logo {
+
+            width: 64px;
+
+            height: 64px;
+
+            object-fit: contain;
+
+            display: block;
+
+            filter:
+                drop-shadow(
+                    0 1px 2px
+                    rgba(0, 0, 0, 0.20)
+                );
+
+        }
+
+
+        /* =====================================================
+           MAIN
+        ====================================================== */
+
+        #main {
+
+            height:
+                calc(100vh - 88px);
+
+            width: 100%;
+
+            display: flex;
+
+            overflow: hidden;
+
+        }
+
+
+        /* =====================================================
+           SIDEBAR
+        ====================================================== */
+
+        #sidebar {
+
+            width: 300px;
+
+            min-width: 300px;
+
+            height: 100%;
+
+            background: #ffffff;
+
+            border-right:
+                1px solid #c8c8c8;
+
+            display: flex;
+
+            flex-direction: column;
+
+            box-shadow:
+                2px 0 5px
+                rgba(0, 0, 0, 0.10);
+
+            position: relative;
+
+            z-index: 1200;
+
+        }
+
+
+        .sidebar-header {
+
+            background:
+                linear-gradient(
+                    90deg,
+                    #f2f6f9,
+                    #eaf1f5
+                );
+
+            padding:
+                12px 15px;
+
+            font-size: 17px;
+
+            font-weight: bold;
+
+            color: #003b63;
+
+            border-bottom:
+                1px solid #d4dce2;
+
+            letter-spacing: 0.3px;
+
+        }
+
+
+        /* =====================================================
+           SEARCH
+        ====================================================== */
+
+        #layer-search {
+
+            padding: 10px;
+
+            background: white;
+
+            border-bottom:
+                1px solid #e0e0e0;
+
+        }
+
+
+        #layer-search input {
+
+            width: 100%;
+
+            height: 36px;
+
+            padding:
+                7px 10px;
+
+            border:
+                1px solid #bfc7cd;
+
+            border-radius: 5px;
+
+            font-size: 13px;
+
+            outline: none;
+
+        }
+
+
+        #layer-search input:focus {
+
+            border-color: #0077aa;
+
+            box-shadow:
+                0 0 3px
+                rgba(0, 119, 170, 0.25);
+
+        }
+
+
+        /* =====================================================
+           LAYER TREE
+        ====================================================== */
+
+        #layer-tree {
+
+            flex: 1;
+
+            overflow-y: auto;
+
+            padding-bottom: 20px;
+
+        }
+
+
+        #layer-tree::-webkit-scrollbar {
+
+            width: 8px;
+
+        }
+
+
+        #layer-tree::-webkit-scrollbar-track {
+
+            background: #f2f2f2;
+
+        }
+
+
+        #layer-tree::-webkit-scrollbar-thumb {
+
+            background: #b8c0c7;
+
+            border-radius: 5px;
+
+        }
+
+
+        .layer-group {
+
+            border-bottom:
+                1px solid #e3e7ea;
+
+        }
+
+
+        .layer-group-title {
+
+            padding:
+                11px 13px;
+
+            background: #fafafa;
+
+            font-size: 14px;
+
+            font-weight: bold;
+
+            color: #174e73;
+
+            cursor: pointer;
+
+            user-select: none;
+
+        }
+
+
+        .layer-group-title:hover {
+
+            background: #eef5fa;
+
+        }
+
+
+        .layer-items {
+
+            padding:
+                5px 12px
+                10px 28px;
+
+        }
+
+
+        .layer-item {
+
+            display: flex;
+
+            align-items: center;
+
+            margin:
+                8px 0;
+
+            font-size: 13px;
+
+            color: #444;
+
+        }
+
+
+        .layer-item input {
+
+            margin-right: 8px;
+
+            cursor: pointer;
+
+        }
+
+
+        .future {
+
+            color: #999;
+
+        }
+
+
+        /* =====================================================
+           MAP
+        ====================================================== */
+
+        #map-container {
+
+            flex: 1;
+
+            min-width: 0;
+
+            position: relative;
+
+            height: 100%;
+
+        }
+
+
+        #map {
+
+            width: 100%;
+
+            height: 100%;
+
+        }
+
+
+        /* =====================================================
+           COORDINATE BOX
+        ====================================================== */
+
+        #coordinates {
+
+            position: absolute;
+
+            left: 12px;
+
+            bottom: 12px;
+
+            z-index: 1000;
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.95
+                );
+
+            padding:
+                7px 11px;
+
+            border-radius: 4px;
+
+            font-size: 12px;
+
+            line-height: 1.45;
+
+            color: #333;
+
+            box-shadow:
+                0 1px 5px
+                rgba(0, 0, 0, 0.30);
+
+        }
+
+
+        /* =====================================================
+           HOME BUTTON
+        ====================================================== */
+
+        .home-control {
+
+            background: #ffffff;
+
+            width: 34px;
+
+            height: 34px;
+
+            display: flex;
+
+            align-items: center;
+
+            justify-content: center;
+
+            cursor: pointer;
+
+            border-radius: 4px;
+
+            box-shadow:
+                0 1px 5px
+                rgba(0, 0, 0, 0.35);
+
+            font-size: 19px;
+
+            color: #174e73;
+
+            font-weight: bold;
+
+        }
+
+
+        .home-control:hover {
+
+            background: #f0f5f8;
+
+        }
+
+
+        /* =====================================================
+           LEGEND
+        ====================================================== */
+
+        .legend {
+
+            background:
+                rgba(
+                    255,
+                    255,
+                    255,
+                    0.96
+                );
+
+            padding:
+                10px 12px;
+
+            border-radius: 5px;
+
+            box-shadow:
+                0 1px 5px
+                rgba(0, 0, 0, 0.35);
+
+            font-size: 12px;
+
+            line-height: 1.7;
+
+        }
+
+
+        .legend-title {
+
+            font-weight: bold;
+
+            margin-bottom: 6px;
+
+            color: #003b63;
+
+            font-size: 13px;
+
+        }
+
+
+        .road-legend-row {
+
+            display: flex;
+
+            align-items: center;
+
+            margin: 3px 0;
+
+        }
+
+
+        .road-legend-line {
+
+            display: inline-block;
+
+            width: 25px;
+
+            margin-right: 7px;
+
+            border-radius: 2px;
+
+        }
+
+
+        /* =====================================================
+           BASEMAP CONTROL
+        ====================================================== */
+
+        .leaflet-control-layers {
+
+            border-radius:
+                5px !important;
+
+            box-shadow:
+                0 1px 5px
+                rgba(0, 0, 0, 0.30) !important;
+
+        }
+
+
+        /* =====================================================
+           ROAD POPUP
+        ====================================================== */
+
+        .road-popup {
+
+            min-width: 300px;
+
+            max-width: 370px;
+
+            font-family:
+                Arial,
+                Helvetica,
+                sans-serif;
+
+        }
+
+
+        .road-popup-title {
+
+            background: #003b63;
+
+            color: white;
+
+            padding:
+                10px 12px;
+
+            margin:
+                -10px -12px
+                10px -12px;
+
+            font-size: 15px;
+
+            font-weight: bold;
+
+        }
+
+
+        .road-popup-table {
+
+            width: 100%;
+
+            border-collapse: collapse;
+
+            font-size: 12.5px;
+
+        }
+
+
+        .road-popup-table td {
+
+            padding:
+                5px 5px;
+
+            border-bottom:
+                1px solid #eeeeee;
+
+            vertical-align: top;
+
+        }
+
+
+        .road-popup-table td:first-child {
+
+            width: 43%;
+
+            font-weight: bold;
+
+            color: #444;
+
+        }
+
+
+        .road-popup-table td:last-child {
+
+            color: #222;
+
+        }
+
+
+        /* =====================================================
+           RESPONSIVE
+        ====================================================== */
+
+        @media(max-width: 900px) {
+
+            #sidebar {
+
+                width: 240px;
+
+                min-width: 240px;
+
+            }
+
+
+            #header {
+
+                height: 82px;
+
+                padding: 0 12px;
+
+                grid-template-columns:
+                    56px
+                    minmax(0, 1fr)
+                    56px;
+
+            }
+
+
+            #main {
+
+                height:
+                    calc(100vh - 82px);
+
+            }
+
+
+            #header-title .university {
+
+                font-size: 11px;
+
+            }
+
+
+            #header-title .main {
+
+                font-size: 19px;
+
+            }
+
+
+            #header-title .sub {
+
+                font-size: 11px;
+
+            }
+
+
+            #header-logo-wrap,
+            #header-spacer {
+
+                width: 56px;
+
+                height: 56px;
+
+            }
+
+
+            #header-logo {
+
+                width: 50px;
+
+                height: 50px;
+
+            }
+
+        }
+
+
+        @media(max-width: 650px) {
+
+            #sidebar {
+
+                width: 210px;
+
+                min-width: 210px;
+
+            }
+
+
+            #header {
+
+                grid-template-columns:
+                    46px
+                    minmax(0, 1fr)
+                    46px;
+
+                padding:
+                    0 8px;
+
+            }
+
+
+            #header-title .main {
+
+                font-size: 16px;
+
+            }
+
+
+            #header-title .university {
+
+                font-size: 9px;
+
+            }
+
+
+            #header-title .sub {
+
+                display: none;
+
+            }
+
+
+            #header-logo-wrap,
+            #header-spacer {
+
+                width: 46px;
+
+                height: 46px;
+
+            }
+
+
+            #header-logo {
+
+                width: 42px;
+
+                height: 42px;
+
+            }
+
+        }
+
+    </style>
+
+</head>
+
+
+<body>
+
+
+    <!-- =====================================================
+         HEADER
+    ====================================================== -->
+
+    <div id="header">
+
+
+        <!-- Cột trái đối xứng với logo -->
+        <div
+            id="header-spacer"
+            aria-hidden="true"
+        ></div>
+
+
+        <!-- TÊN TRƯỜNG / BỘ MÔN -->
+
+        <div id="header-title">
+
+
+            <div class="university">
+
+                TRƯỜNG ĐẠI HỌC GIAO THÔNG VẬN TẢI (UTC)
+
+            </div>
+
+
+            <div class="main">
+
+                BỘ MÔN TRẮC ĐỊA VÀ VIỄN THÁM
+
+            </div>
+
+
+            <div class="sub">
+
+                WEBGIS – HỆ THỐNG QUẢN LÝ HẠ TẦNG GIAO THÔNG
+
+            </div>
+
+
+        </div>
+
+
+        <!-- LOGO UTC -->
+
+        <div id="header-logo-wrap">
+
+            <img
+                id="header-logo"
+                src="images/utc_logo.png"
+                alt="Logo Trường Đại học Giao thông Vận tải"
+            >
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         MAIN
+    ====================================================== -->
+
+    <div id="main">
+
+
+        <!-- =================================================
+             LEFT SIDEBAR
+        ================================================== -->
+
+        <div id="sidebar">
+
+
+            <div class="sidebar-header">
+
+                LỚP DỮ LIỆU
+
+            </div>
+
+
+            <!-- SEARCH -->
+
+            <div id="layer-search">
+
+                <input
+                    type="text"
+                    id="layerSearch"
+                    placeholder="Tìm kiếm lớp dữ liệu..."
+                >
+
+            </div>
+
+
+            <!-- =================================================
+                 LAYER TREE
+            ================================================== -->
+
+            <div id="layer-tree">
+
+
+                <!-- =================================================
+                     GIAO THÔNG
+                ================================================== -->
+
+                <div class="layer-group">
+
+
+                    <div class="layer-group-title">
+
+                        ▾ GIAO THÔNG
+
+                    </div>
+
+
+                    <div class="layer-items">
+
+
+                        <!-- MẠNG ĐƯỜNG ĐỐNG ĐA -->
+
+                        <div class="layer-item">
+
+                            <input
+                                type="checkbox"
+                                id="chkRoadDongDa"
+                                checked
+                            >
+
+                            <span>
+
+                                Mạng lưới đường Đống Đa
+
+                            </span>
+
+                        </div>
+
+
+                        <!-- CẦU - CHƯA KÍCH HOẠT -->
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Cầu Đống Đa
+
+                        </div>
+
+
+                        <!-- HẦM -->
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Hầm
+
+                        </div>
+
+
+                        <!-- NÚT GIAO -->
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Nút giao
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     HẠ TẦNG ATGT
+                ================================================== -->
+
+                <div class="layer-group">
+
+
+                    <div class="layer-group-title">
+
+                        ▾ HẠ TẦNG ATGT
+
+                    </div>
+
+
+                    <div class="layer-items">
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Biển báo
+
+                        </div>
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Đèn tín hiệu
+
+                        </div>
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Chiếu sáng
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     AN TOÀN GIAO THÔNG
+                ================================================== -->
+
+                <div class="layer-group">
+
+
+                    <div class="layer-group-title">
+
+                        ▾ AN TOÀN GIAO THÔNG
+
+                    </div>
+
+
+                    <div class="layer-items">
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Tai nạn giao thông
+
+                        </div>
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Điểm đen
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     ĐÔ THỊ
+                ================================================== -->
+
+                <div class="layer-group">
+
+
+                    <div class="layer-group-title">
+
+                        ▾ ĐÔ THỊ
+
+                    </div>
+
+
+                    <div class="layer-items">
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Khu dân cư
+
+                        </div>
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Khu công nghiệp
+
+                        </div>
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Ranh giới hành chính
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+                <!-- =================================================
+                     BIM / CÔNG TRÌNH
+                ================================================== -->
+
+                <div class="layer-group">
+
+
+                    <div class="layer-group-title">
+
+                        ▾ BIM / CÔNG TRÌNH
+
+                    </div>
+
+
+                    <div class="layer-items">
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Công trình BIM
+
+                        </div>
+
+
+                        <div class="layer-item future">
+
+                            <input
+                                type="checkbox"
+                                disabled
+                            >
+
+                            Mô hình 3D
+
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+            </div>
+
+        </div>
+
+
+
+        <!-- =================================================
+             MAP
+        ================================================== -->
+
+        <div id="map-container">
+
+
+            <div id="map"></div>
+
+
+            <div id="coordinates">
+
+                Lat: --
+
+                <br>
+
+                Lon: --
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================================
+         LEAFLET JAVASCRIPT
+    ====================================================== -->
+
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    ></script>
+
+
+
+    <script>
+
+
+        /* =====================================================
+           1. CREATE MAP
+        ====================================================== */
+
+        var map = L.map(
+            'map',
+            {
+                center: [
+                    21.0200,
+                    105.8300
+                ],
+
+                zoom: 14,
+
+                zoomControl: true
+            }
+        );
+
+
+        /* =====================================================
+           2. BASEMAPS
+        ====================================================== */
+
+
+        var osm = L.tileLayer(
+
+            'https://tile.openstreetmap.org/{z}/{x}/{y}.png',
+
+            {
+                maxZoom: 19,
+
+                attribution:
+                    '&copy; OpenStreetMap contributors'
+            }
+
+        );
+
+
+        var satellite = L.tileLayer(
+
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+
+            {
+                maxZoom: 19,
+
+                attribution:
+                    'Tiles &copy; Esri'
+            }
+
+        );
+
+
+        var topo = L.tileLayer(
+
+            'https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png',
+
+            {
+                maxZoom: 17,
+
+                attribution:
+                    'Map data &copy; OpenStreetMap contributors, SRTM | Map style &copy; OpenTopoMap'
+            }
+
+        );
+
+
+        var light = L.tileLayer(
+
+            'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+
+            {
+                maxZoom: 20,
+
+                attribution:
+                    '&copy; OpenStreetMap contributors &copy; CARTO'
+            }
+
+        );
+
+
+        /* Mặc định */
+
+        osm.addTo(map);
+
+
+
+        /* =====================================================
+           3. BASEMAP CONTROL
+        ====================================================== */
+
+        var baseMaps = {
+
+            "OpenStreetMap":
+                osm,
+
+            "Vệ tinh":
+                satellite,
+
+            "Địa hình":
+                topo,
+
+            "Bản đồ sáng":
+                light
+
+        };
+
+
+        L.control.layers(
+
+            baseMaps,
+
+            null,
+
+            {
+                position:
+                    'topright',
+
+                collapsed:
+                    false
+
+            }
+
+        ).addTo(map);
+
+
+
+        /* =====================================================
+           4. MOUSE COORDINATES
+        ====================================================== */
+
+        map.on(
+
+            'mousemove',
+
+            function(e){
+
+                document
+                    .getElementById(
+                        'coordinates'
+                    )
+                    .innerHTML =
+
+                    'Lat: ' +
+                    e.latlng.lat.toFixed(6)
+
+                    +
+
+                    '<br>Lon: ' +
+
+                    e.latlng.lng.toFixed(6);
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           5. HOME BUTTON
+        ====================================================== */
+
+        var HomeControl =
+            L.Control.extend({
+
+                options: {
+
+                    position:
+                        'topleft'
+
+                },
+
+
+                onAdd:
+                    function(){
+
+                        var div =
+                            L.DomUtil.create(
+                                'div',
+                                'home-control'
+                            );
+
+
+                        div.innerHTML =
+                            '⌂';
+
+
+                        div.title =
+                            'Về khu vực Đống Đa';
+
+
+                        div.onclick =
+                            function(){
+
+                                if(
+                                    roadDongDaLayer &&
+                                    roadDongDaLayer
+                                        .getBounds()
+                                        .isValid()
+                                ){
+
+                                    map.fitBounds(
+
+                                        roadDongDaLayer
+                                            .getBounds(),
+
+                                        {
+                                            padding:
+                                                [20,20]
+                                        }
+
+                                    );
+
+                                }
+                                else {
+
+                                    map.setView(
+                                        [
+                                            21.0200,
+                                            105.8300
+                                        ],
+                                        14
+                                    );
+
+                                }
+
+                            };
+
+
+                        return div;
+
+                    }
+
+            });
+
+
+        map.addControl(
+
+            new HomeControl()
+
+        );
+
+
+
+        /* =====================================================
+           6. SCALE
+        ====================================================== */
+
+        L.control.scale({
+
+            imperial: false,
+
+            metric: true
+
+        }).addTo(map);
+
+
+
+        /* =====================================================
+           7. LEGEND
+        ====================================================== */
+
+        var legend =
+
+            L.control({
+
+                position:
+                    'bottomright'
+
+            });
+
+
+        legend.onAdd =
+
+            function(){
+
+                var div =
+
+                    L.DomUtil.create(
+                        'div',
+                        'legend'
+                    );
+
+
+                div.innerHTML =
+
+                    '<div class="legend-title">' +
+                    'CHÚ GIẢI' +
+                    '</div>' +
+
+                    '<div>' +
+                    'Đang tải dữ liệu...' +
+                    '</div>';
+
+
+                return div;
+
+            };
+
+
+        legend.addTo(map);
+
+
+
+        /* =====================================================
+           8. LAYER SEARCH
+        ====================================================== */
+
+        document
+            .getElementById(
+                'layerSearch'
+            )
+            .addEventListener(
+
+                'keyup',
+
+                function(){
+
+                    var text =
+
+                        this.value
+                            .toLowerCase();
+
+
+                    document
+                        .querySelectorAll(
+                            '.layer-item'
+                        )
+                        .forEach(
+
+                            function(item){
+
+                                if(
+
+                                    item
+                                        .textContent
+                                        .toLowerCase()
+                                        .includes(
+                                            text
+                                        )
+
+                                ){
+
+                                    item.style.display =
+                                        'flex';
+
+                                }
+
+                                else {
+
+                                    item.style.display =
+                                        'none';
+
+                                }
+
+                            }
+
+                        );
+
+                }
+
+            );
+
+
+
+        /* =====================================================
+           9. COLLAPSE / EXPAND GROUPS
+        ====================================================== */
+
+        document
+            .querySelectorAll(
+                '.layer-group-title'
+            )
+            .forEach(
+
+                function(title){
+
+                    title.addEventListener(
+
+                        'click',
+
+                        function(){
+
+                            var items =
+                                this
+                                    .nextElementSibling;
+
+
+                            if(
+                                items.style.display
+                                ===
+                                'none'
+                            ){
+
+                                items.style.display =
+                                    'block';
+
+
+                                this.innerHTML =
+                                    this
+                                        .innerHTML
+                                        .replace(
+                                            '▸',
+                                            '▾'
+                                        );
+
+                            }
+
+                            else {
+
+                                items.style.display =
+                                    'none';
+
+
+                                this.innerHTML =
+                                    this
+                                        .innerHTML
+                                        .replace(
+                                            '▾',
+                                            '▸'
+                                        );
+
+                            }
+
+                        }
+
+                    );
+
+                }
+
+            );
+
+
+
+        /* =====================================================
+           10. ROAD NETWORK - ĐỐNG ĐA
+        ====================================================== */
+
+        var roadDongDaLayer = null;
+
+
+
+        /* -----------------------------------------------------
+           TÊN LOẠI ĐƯỜNG
+        ----------------------------------------------------- */
+
+        var roadTypeNames = {
+
+            "3":
+                "Dân",
+
+            "5":
+                "Phố",
+
+            "6":
+                "Làng / Ngõ / Phố",
+
+            "7":
+                "Đường chính"
+
+        };
+
+
+
+        /* -----------------------------------------------------
+           STYLE ĐƯỜNG
+        ----------------------------------------------------- */
+
+        var roadStyles = {
+
+            "3": {
+
+                color:
+                    "#9E9E9E",
+
+                weight:
+                    1.7,
+
+                opacity:
+                    0.85
+
+            },
+
+
+            "5": {
+
+                color:
+                    "#E67E22",
+
+                weight:
+                    3,
+
+                opacity:
+                    0.95
+
+            },
+
+
+            "6": {
+
+                color:
+                    "#777777",
+
+                weight:
+                    2,
+
+                opacity:
+                    0.85
+
+            },
+
+
+            "7": {
+
+                color:
+                    "#C0392B",
+
+                weight:
+                    4,
+
+                opacity:
+                    1
+
+            }
+
+        };
+
+
+
+        /* -----------------------------------------------------
+           HÀM LẤY GIÁ TRỊ
+        ----------------------------------------------------- */
+
+        function roadValue(value){
+
+            if(
+
+                value === null ||
+
+                value === undefined ||
+
+                value === "" ||
+
+                String(value)
+                    .trim()
+                    .toLowerCase()
+                    ===
+                    "null"
+
+            ){
+
+                return "-";
+
+            }
+
+
+            return value;
+
+        }
+
+
+
+        /* -----------------------------------------------------
+           STYLE
+        ----------------------------------------------------- */
+
+        function getRoadStyle(
+            properties
+        ){
+
+            var type =
+
+                String(
+                    properties.loaiDuongBo
+                    ??
+                    ""
+                );
+
+
+            return (
+
+                roadStyles[type]
+
+                ||
+
+                {
+
+                    color:
+                        "#888888",
+
+                    weight:
+                        1.5,
+
+                    opacity:
+                        0.8
+
+                }
+
+            );
+
+        }
+
+
+
+        /* -----------------------------------------------------
+           TÊN LOẠI ĐƯỜNG
+        ----------------------------------------------------- */
+
+        function getRoadTypeName(
+            value
+        ){
+
+            var key =
+                String(value);
+
+
+            return (
+
+                roadTypeNames[key]
+
+                ||
+
+                roadValue(value)
+
+            );
+
+        }
+
+
+
+        /* -----------------------------------------------------
+           LẤY FIELD CÓ THỂ KHÁC TÊN
+        ----------------------------------------------------- */
+
+        function firstProperty(
+            properties,
+            names
+        ){
+
+            for(
+                var i = 0;
+                i < names.length;
+                i++
+            ){
+
+                var name =
+                    names[i];
+
+
+                if(
+                    properties
+                    &&
+                    Object.prototype
+                        .hasOwnProperty
+                        .call(
+                            properties,
+                            name
+                        )
+                    &&
+                    properties[name] !== null
+                    &&
+                    properties[name] !== undefined
+                    &&
+                    properties[name] !== ""
+                ){
+
+                    return properties[name];
+
+                }
+
+            }
+
+
+            return null;
+
+        }
+
+
+
+        /* -----------------------------------------------------
+           POPUP
+        ----------------------------------------------------- */
+
+        function createRoadPopup(
+            properties
+        ){
+
+            var name =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "ten",
+                            "Ten",
+                            "TEN",
+                            "TenDuong"
+                        ]
+
+                    )
+
+                );
+
+
+            var objectId =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "maDoiTuong",
+                            "MaDoiTuong",
+                            "MA_DOI_TUONG"
+                        ]
+
+                    )
+
+                );
+
+
+            var roadType =
+
+                getRoadTypeName(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "loaiDuongBo",
+                            "LoaiDuongBo",
+                            "LOAI_DUONG_BO"
+                        ]
+
+                    )
+
+                );
+
+
+            var material =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "loaiChatLieuTraiMat",
+                            "LoaiChatLieuTraiMat",
+                            "LOAI_CHAT_LIEU_TRAI_MAT"
+                        ]
+
+                    )
+
+                );
+
+
+            var condition =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "aiHienTrangSuDung",
+                            "aiHienTrangSuDur",
+                            "HienTrangSuDung"
+                        ]
+
+                    )
+
+                );
+
+
+            var structure =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "loaiKetCau",
+                            "LoaiKetCau"
+                        ]
+
+                    )
+
+                );
+
+
+            var width =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "doRong",
+                            "DoRong"
+                        ]
+
+                    )
+
+                );
+
+
+            var length =
+
+                firstProperty(
+
+                    properties,
+
+                    [
+                        "Shape_Length",
+                        "shape_length"
+                    ]
+
+                );
+
+
+            if(
+
+                length !== null
+                &&
+                !isNaN(
+                    Number(length)
+                )
+
+            ){
+
+                length =
+                    Number(length)
+                        .toFixed(2)
+                    +
+                    " m";
+
+            }
+
+            else {
+
+                length = "-";
+
+            }
+
+
+            var damage =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "LoaiHuHong",
+                            "loaiHuHong",
+                            "LoaiHuhong"
+                        ]
+
+                    )
+
+                );
+
+
+            var location =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "ViTri",
+                            "viTri"
+                        ]
+
+                    )
+
+                );
+
+
+            var size =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "KichThuoc",
+                            "kichThuoc"
+                        ]
+
+                    )
+
+                );
+
+
+            var damageLevel =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "MucDoHuHong",
+                            "mucDoHuHong"
+                        ]
+
+                    )
+
+                );
+
+
+            var collectDate =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "ngayThuNhan",
+                            "NgayThuNhan"
+                        ]
+
+                    )
+
+                );
+
+
+            var updateDate =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "ngayCapNhat",
+                            "NgayCapNhat"
+                        ]
+
+                    )
+
+                );
+
+
+            var repairDate =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "ThoiGianSuaChua",
+                            "thoiGianSuaChua"
+                        ]
+
+                    )
+
+                );
+
+
+            var cost =
+
+                roadValue(
+
+                    firstProperty(
+
+                        properties,
+
+                        [
+                            "KinhPhi",
+                            "KinhhPhi",
+                            "kinhPhi"
+                        ]
+
+                    )
+
+                );
+
+
+            return `
+
+                <div class="road-popup">
+
+
+                    <div class="road-popup-title">
+
+                        THÔNG TIN TUYẾN ĐƯỜNG
+
+                    </div>
+
+
+                    <table
+                        class="road-popup-table"
+                    >
+
+
+                        <tr>
+
+                            <td>
+                                Tên đường
+                            </td>
+
+                            <td>
+                                ${name}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Mã đối tượng
+                            </td>
+
+                            <td>
+                                ${objectId}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Loại đường bộ
+                            </td>
+
+                            <td>
+                                ${roadType}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Chất liệu mặt đường
+                            </td>
+
+                            <td>
+                                ${material}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Hiện trạng sử dụng
+                            </td>
+
+                            <td>
+                                ${condition}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Loại kết cấu
+                            </td>
+
+                            <td>
+                                ${structure}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Độ rộng
+                            </td>
+
+                            <td>
+                                ${width}
+                                m
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Chiều dài
+                            </td>
+
+                            <td>
+                                ${length}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Loại hư hỏng
+                            </td>
+
+                            <td>
+                                ${damage}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Vị trí
+                            </td>
+
+                            <td>
+                                ${location}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Kích thước
+                            </td>
+
+                            <td>
+                                ${size}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Mức độ hư hỏng
+                            </td>
+
+                            <td>
+                                ${damageLevel}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Ngày thu nhận
+                            </td>
+
+                            <td>
+                                ${collectDate}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Ngày cập nhật
+                            </td>
+
+                            <td>
+                                ${updateDate}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Thời gian sửa chữa
+                            </td>
+
+                            <td>
+                                ${repairDate}
+                            </td>
+
+                        </tr>
+
+
+                        <tr>
+
+                            <td>
+                                Kinh phí
+                            </td>
+
+                            <td>
+                                ${cost}
+                            </td>
+
+                        </tr>
+
+
+                    </table>
+
+
+                </div>
+
+            `;
+
+        }
+
+
+
+        /* -----------------------------------------------------
+           LOAD GEOJSON
+        ----------------------------------------------------- */
+
+        fetch(
+            "data/road_dongda.geojson"
+        )
+
+
+        .then(
+
+            function(response){
+
+                if(
+                    !response.ok
+                ){
+
+                    throw new Error(
+
+                        "Không tải được " +
+                        "data/road/" +
+                        "road_dongda.geojson"
+
+                    );
+
+                }
+
+
+                return response.json();
+
+            }
+
+        )
+
+
+        .then(
+
+            function(data){
+
+                roadDongDaLayer =
+
+                    L.geoJSON(
+
+                        data,
+
+                        {
+
+
+                            style:
+
+                                function(
+                                    feature
+                                ){
+
+                                    return getRoadStyle(
+
+                                        feature
+                                            .properties
+                                            ||
+                                            {}
+
+                                    );
+
+                                },
+
+
+                            onEachFeature:
+
+                                function(
+                                    feature,
+                                    layer
+                                ){
+
+                                    var properties =
+                                        feature.properties
+                                        ||
+                                        {};
+
+
+                                    /*
+                                       POPUP
+                                    */
+
+                                    layer.bindPopup(
+
+                                        createRoadPopup(
+                                            properties
+                                        ),
+
+                                        {
+
+                                            maxWidth:
+                                                420
+
+                                        }
+
+                                    );
+
+
+                                    /*
+                                       HIGHLIGHT
+                                    */
+
+                                    layer.on({
+
+                                        mouseover:
+
+                                            function(e){
+
+                                                var original =
+
+                                                    getRoadStyle(
+                                                        properties
+                                                    );
+
+
+                                                e.target.setStyle({
+
+                                                    weight:
+                                                        original
+                                                            .weight
+                                                        + 2,
+
+                                                    color:
+                                                        "#00A6D6"
+
+                                                });
+
+
+                                                if(
+
+                                                    !L.Browser.ie
+                                                    &&
+                                                    !L.Browser.opera
+                                                    &&
+                                                    !L.Browser.edge
+
+                                                ){
+
+                                                    e.target
+                                                        .bringToFront();
+
+                                                }
+
+                                            },
+
+
+                                        mouseout:
+
+                                            function(e){
+
+                                                roadDongDaLayer
+                                                    .resetStyle(
+                                                        e.target
+                                                    );
+
+                                            }
+
+                                    });
+
+
+                                }
+
+                        }
+
+                    );
+
+
+                /*
+                   ADD TO MAP
+                */
+
+                roadDongDaLayer.addTo(
+                    map
+                );
+
+
+                /*
+                   ZOOM TO DATA
+                */
+
+                var bounds =
+
+                    roadDongDaLayer
+                        .getBounds();
+
+
+                if(
+                    bounds.isValid()
+                ){
+
+                    map.fitBounds(
+
+                        bounds,
+
+                        {
+                            padding:
+                                [20,20]
+                        }
+
+                    );
+
+                }
+
+
+                console.log(
+
+                    "Đã tải mạng lưới đường Đống Đa:",
+
+                    data.features.length,
+
+                    "đối tượng"
+
+                );
+
+
+                updateRoadLegend();
+
+            }
+
+        )
+
+
+        .catch(
+
+            function(error){
+
+                console.error(
+                    error
+                );
+
+                alert(
+                    "Không tải được lớp đường Đống Đa. " +
+                    "Hãy kiểm tra thư mục data/road/"
+                );
+
+            }
+
+        );
+
+
+
+        /* =====================================================
+           11. CHECKBOX ROAD
+        ====================================================== */
+
+        document
+            .getElementById(
+                "chkRoadDongDa"
+            )
+            .addEventListener(
+
+                "change",
+
+                function(){
+
+                    if(
+                        !roadDongDaLayer
+                    ){
+
+                        return;
+
+                    }
+
+
+                    if(
+                        this.checked
+                    ){
+
+                        roadDongDaLayer
+                            .addTo(map);
+
+                    }
+
+                    else {
+
+                        map.removeLayer(
+                            roadDongDaLayer
+                        );
+
+                    }
+
+
+                    updateRoadLegend();
+
+                }
+
+            );
+
+
+
+        /* =====================================================
+           12. ROAD LEGEND
+        ====================================================== */
+
+        function updateRoadLegend(){
+
+            var legendDiv =
+
+                document.querySelector(
+                    ".legend"
+                );
+
+
+            if(
+                !legendDiv
+            ){
+
+                return;
+
+            }
+
+
+            if(
+
+                !roadDongDaLayer
+
+                ||
+
+                !map.hasLayer(
+                    roadDongDaLayer
+                )
+
+            ){
+
+                legendDiv.innerHTML =
+
+                    '<div class="legend-title">' +
+                    'CHÚ GIẢI' +
+                    '</div>' +
+
+                    '<div>' +
+                    'Chưa bật lớp dữ liệu' +
+                    '</div>';
+
+                return;
+
+            }
+
+
+            legendDiv.innerHTML =
+
+                '<div class="legend-title">' +
+
+                'MẠNG LƯỚI ĐƯỜNG ĐỐNG ĐA' +
+
+                '</div>' +
+
+
+                createLegendRow(
+                    "7",
+                    "Đường chính"
+                ) +
+
+
+                createLegendRow(
+                    "5",
+                    "Phố"
+                ) +
+
+
+                createLegendRow(
+                    "6",
+                    "Làng / Ngõ / Phố"
+                ) +
+
+
+                createLegendRow(
+                    "3",
+                    "Dân"
+                );
+
+        }
+
+
+
+        function createLegendRow(
+            type,
+            label
+        ){
+
+            var style =
+                roadStyles[type];
+
+
+            return `
+
+                <div
+                    class="road-legend-row"
+                >
+
+                    <span
+
+                        class="
+                            road-legend-line
+                        "
+
+                        style="
+                            height:${Math.max(
+                                2,
+                                style.weight
+                            )}px;
+
+                            background:
+                                ${style.color};
+                        "
+
+                    ></span>
+
+
+                    <span>
+
+                        ${label}
+
+                    </span>
+
+
+                </div>
+
+            `;
+
+        }
+
+
+
+        /* =====================================================
+           13. START
+        ====================================================== */
+
+        console.log(
+            "WebGIS Bộ môn Trắc địa và Viễn thám đã khởi động."
+        );
+
+    </script>
+
+
+</body>
+
+</html>
